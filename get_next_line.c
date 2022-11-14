@@ -91,13 +91,8 @@ void	save_splited_line(char **save, int fd)
 
 	i = 0;
 	len = 0;
-	while (1)
+	while (save[fd][i] != '\n')
 	{
-		if (save[fd][i] == '\n')
-		{
-			i++;
-			break ;
-		}
 		if (save[fd][i] == '\0')
 		{
 			free(save[fd]);
@@ -106,6 +101,7 @@ void	save_splited_line(char **save, int fd)
 		}
 		i++;
 	}
+	i++;
 	while (save[fd][i + len] != '\0')
 		len++;
 	line = (char *)malloc(sizeof(char) * (len + 1));
