@@ -12,9 +12,9 @@
 
 #include "get_next_line.h"
 
-char	*get_splited_line(char **save, const int fd);
-void	save_splited_line(char **save, int fd);
-int		get_raw_line(char **save, int fd);
+static char	*get_splited_line(char **save, const int fd);
+static void	save_splited_line(char **save, int fd);
+static int	get_raw_line(char **save, int fd);
 
 char	*get_next_line(int fd)
 {
@@ -30,7 +30,7 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-int	get_raw_line(char **save, int fd)
+static int	get_raw_line(char **save, int fd)
 {
 	int		loop_flag;
 	char	*tmp;
@@ -57,7 +57,7 @@ int	get_raw_line(char **save, int fd)
 	return (0);
 }
 
-char	*get_splited_line(char **save, const int fd)
+static char	*get_splited_line(char **save, const int fd)
 {
 	char	*line;
 	size_t	len;
@@ -83,7 +83,7 @@ char	*get_splited_line(char **save, const int fd)
 	return (line);
 }
 
-void	save_splited_line(char **save, int fd)
+static void	save_splited_line(char **save, int fd)
 {
 	char	*line;
 	size_t	i;
