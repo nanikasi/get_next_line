@@ -31,6 +31,7 @@ char	*get_next_line(int fd)
 	if (line == NULL || e_flag)
 	{
 		free(save[fd]);
+		save[fd] = NULL;
 		return (NULL);
 	}
 	if (save[fd] == NULL)

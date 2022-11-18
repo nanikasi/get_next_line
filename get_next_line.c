@@ -31,6 +31,7 @@ char	*get_next_line(int fd)
 	if (line == NULL || error_flag)
 	{
 		free(save);
+		save = NULL;
 		return (NULL);
 	}
 	save = save_splited_line(save, &error_flag, i);
