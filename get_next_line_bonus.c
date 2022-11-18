@@ -12,99 +12,109 @@
 
 #include "get_next_line_bonus.h"
 
-static char	*get_splited_line(char **save, const int fd);
-static void	save_splited_line(char **save, int fd);
 static int	get_raw_line(char **save, int fd);
+static char	*get_splited_line(char **save, int fd, int *e_flag, size_t *len);
+static void	save_splited_line(char **save, int fd, int *e_flag, size_t i);
 
 char	*get_next_line(int fd)
 {
 	static char	*save[1024];
 	char		*line;
+	int			e_flag;
+	size_t		i;
 
 	if (fd < 0 || 1024 < fd)
 		return (NULL);
+	e_flag = 0;
 	get_raw_line(save, fd);
-	line = get_splited_line(save, fd);
-	if (save[fd] != NULL)
-		save_splited_line(save, fd);
+	line = get_splited_line(save, fd, &e_flag, &i);
+	if (line == NULL || e_flag)
+	{
+		free(save[fd]);
+		return (NULL);
+	}
+	if (save[fd] == NULL)
+		return (line);
+	save_splited_line(save, fd, &e_flag, i);
+	if (e_flag)
+	{
+		free(line);
+		return (NULL);
+	}
 	return (line);
 }
 
 static int	get_raw_line(char **save, int fd)
 {
 	int		loop_flag;
+	char	buffer[BUFFER_SIZE + 1];
 	char	*tmp;
-	char	*line;
 	int		read_count;
 
 	loop_flag = 1;
 	if (ft_strnchr(save[fd], '\n', ft_strlen(save[fd])))
 		loop_flag = 0;
-	tmp = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	while (loop_flag)
 	{
-		ft_memset(tmp, '\0', BUFFER_SIZE + 1);
-		read_count = read(fd, tmp, BUFFER_SIZE);
+		ft_memset(buffer, '\0', BUFFER_SIZE + 1);
+		read_count = read(fd, buffer, BUFFER_SIZE);
 		if (0 >= read_count)
 			break ;
-		if (ft_strnchr(tmp, '\n', BUFFER_SIZE))
+		if (ft_strnchr(buffer, '\n', BUFFER_SIZE))
 			loop_flag = 0;
-		line = ft_strjoin(save[fd], tmp);
+		tmp = ft_strjoin(save[fd], buffer);
 		free(save[fd]);
-		save[fd] = line;
+		save[fd] = tmp;
 	}
-	free(tmp);
 	return (0);
 }
 
-static char	*get_splited_line(char **save, const int fd)
+static char	*get_splited_line(char **save, int fd, int *e_flag, size_t *len)
 {
 	char	*line;
-	size_t	len;
 
-	len = 0;
-	if (save[fd] == NULL)
+	(void) e_flag;
+	*len = 0;
+	if (save[fd] == NULL || save[fd][0] == '\0')
 		return (NULL);
-	if (save[fd][0] == '\0')
-		return (NULL);
-	while (1)
+	while (save[fd][*len] != '\n')
 	{
-		if (save[fd][len] == '\n')
-		{
-			len++;
+		if (save[fd][*len] == '\0')
 			break ;
-		}
-		if (save[fd][len] == '\0')
-			break ;
-		len++;
+		(*len)++;
 	}
-	line = (char *)malloc(sizeof(char) * (len + 1));
-	ft_strlcpy(line, save[fd], len + 1);
+	(*len)++;
+	line = (char *)malloc(sizeof(char) * (*len + 1));
+	if (line == NULL)
+	{
+		*e_flag = 1;
+		return (NULL);
+	}
+	ft_strlcpy(line, save[fd], *len + 1);
 	return (line);
 }
 
-static void	save_splited_line(char **save, int fd)
+static void	save_splited_line(char **save, int fd, int *e_flag, size_t i)
 {
 	char	*line;
-	size_t	i;
 	size_t	len;
 
-	i = 0;
+	(void) e_flag;
 	len = 0;
-	while (save[fd][i] != '\n')
+	if (save[fd][i - 1] == '\0')
 	{
-		if (save[fd][i] == '\0')
-		{
-			free(save[fd]);
-			save[fd] = NULL;
-			return ;
-		}
-		i++;
+		free(save[fd]);
+		save[fd] = NULL;
+		return ;
 	}
-	i++;
 	while (save[fd][i + len] != '\0')
 		len++;
 	line = (char *)malloc(sizeof(char) * (len + 1));
+	if (line == NULL)
+	{
+		*e_flag = 1;
+		return ;
+	}
 	ft_strlcpy(line, &save[fd][i], len + 1);
 	free(save[fd]);
 	save[fd] = line;
